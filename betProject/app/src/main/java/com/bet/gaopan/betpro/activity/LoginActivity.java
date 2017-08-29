@@ -29,6 +29,7 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bet.gaopan.betpro.R;
 import com.bet.gaopan.betpro.utils.ConstantUtils;
@@ -99,7 +100,12 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     }
 
     private void goLobbyAcitivity(){
-       ConstantUtils.userName= mEmailView.getText().toString();
+        String userNameText=mEmailView.getText().toString();
+        if(TextUtils.isEmpty(userNameText)||userNameText.length()>20){
+            Toast.makeText(this,"名称设置不符合要求，请重新设置用户名",Toast.LENGTH_SHORT).show();
+            return;
+        }
+       ConstantUtils.userName= userNameText;
         Intent intent = new Intent();
         intent.setClass(LoginActivity.this,LobbyActivity.class);
         this.startActivity(intent);

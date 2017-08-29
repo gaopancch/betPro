@@ -24,7 +24,8 @@
         <activity
             android:name=".activity.LoginActivity"
             android:label="@string/title_activity_login" />
-        <activity android:name=".activity.LobbyActivity"></activity>
+        <activity android:name=".activity.LobbyActivity" />
+        <activity android:name=".activity.RoomActivity"></activity>
     </application>
 
 </manifest>

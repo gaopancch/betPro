@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="com.bet.gaopan.betpro.activity.RoomActivity">
+
+
+    <LinearLayout
+        android:id="@+id/linear_sub"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="500dp"
+        android:orientation="vertical"
+        android:background="#dddddd"
+        android:weightSum="3"
+        tools:layout_editor_absoluteY="0dp"
+        tools:layout_editor_absoluteX="0dp">
+
+    </LinearLayout>
+    <Button
+        android:id="@+id/distribute"
+        android:text="发牌"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+    <Button
+        android:id="@+id/hideCards"
+        android:text="隐藏牌"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+</LinearLayout>
