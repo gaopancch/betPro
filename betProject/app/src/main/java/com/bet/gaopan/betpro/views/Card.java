@@ -10,6 +10,11 @@ import android.widget.TextView;
 
 import com.bet.gaopan.betpro.R;
 
+import static com.bet.gaopan.betpro.views.Card.HSDC_type.club;
+import static com.bet.gaopan.betpro.views.Card.HSDC_type.diamond;
+import static com.bet.gaopan.betpro.views.Card.HSDC_type.heart;
+import static com.bet.gaopan.betpro.views.Card.HSDC_type.spade;
+
 /**
  * Created by letv on 2017/8/28.
  */
@@ -33,17 +38,50 @@ public class Card extends LinearLayout {
 
     public Card(Context context,int value,HSDC_type type) {
         super(context);
-        numberText=new TextView(context);
-        numberText.setTextSize(50);
-        numberText.setTextColor(Color.WHITE);
-        setOrientation(LinearLayout.VERTICAL);
-        addView(numberText);
+        initNumberText(context);
         if(value>13||value<1){
             value=0;
         }
         number=numbers[value];
         this.type=type;
         showCard();
+    }
+
+    public Card(Context context){
+        super(context);
+        initNumberText(context);
+    }
+
+    public void setValue(int value){
+        number=numbers[value];
+    }
+
+    public void setValue(String value){
+        number=value;
+    }
+
+    public void setType(HSDC_type type){
+        this.type=type;
+    }
+
+    public void setType(String type){
+        if(type.equals("heart")){
+            this.type=heart;
+        }else if(type.equals("spade")){
+            this.type=spade;
+        }else if(type.equals("diamond")){
+            this.type=diamond;
+        }else if(type.equals("club")){
+            this.type=club;
+        }
+    }
+
+    private void initNumberText(Context context){
+        numberText=new TextView(context);
+        numberText.setTextSize(50);
+        numberText.setTextColor(Color.WHITE);
+        setOrientation(LinearLayout.VERTICAL);
+        addView(numberText);
     }
 
     private void setBackgroundWithType(){

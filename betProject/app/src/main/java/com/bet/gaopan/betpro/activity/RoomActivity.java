@@ -1,6 +1,7 @@
 package com.bet.gaopan.betpro.activity;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,6 +11,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.bet.gaopan.betpro.R;
+import com.bet.gaopan.betpro.utils.ActivityUtils;
 import com.bet.gaopan.betpro.utils.ConstantUtils;
 import com.bet.gaopan.betpro.views.Card;
 import com.bet.gaopan.betpro.views.CardBox;
@@ -61,6 +63,7 @@ public class RoomActivity extends Activity {
                     players.get(i).addCard(cardBox.sendCard());
                     players.get(i).addCard(cardBox.sendCard());
                 }
+//                ActivityUtils.goToActivity(RoomActivity.this,ClientActivity.class);
             }
         });
 
@@ -69,6 +72,8 @@ public class RoomActivity extends Activity {
             public void onClick(View v) {
 
                 players.get(0).hideCards();
+//                ActivityUtils.goToActivity(RoomActivity.this,ServerActivity.class);
+
             }
         });
 

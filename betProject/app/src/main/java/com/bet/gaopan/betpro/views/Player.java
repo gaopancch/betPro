@@ -23,7 +23,7 @@ public class Player extends LinearLayout {
         setOrientation(LinearLayout.VERTICAL);
         TextView nameText=new TextView(context);
         nameText.setText(name);
-        nameText.setTextSize(40);
+        nameText.setTextSize(20);
         nameText.setTextColor(Color.RED);
         addView(nameText,new LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,ViewGroup.LayoutParams.WRAP_CONTENT));
 

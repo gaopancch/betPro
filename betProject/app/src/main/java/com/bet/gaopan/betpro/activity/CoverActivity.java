@@ -5,6 +5,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
 import com.bet.gaopan.betpro.R;
+import com.bet.gaopan.betpro.utils.ActivityUtils;
 
 public class CoverActivity extends AppCompatActivity {
 
@@ -21,14 +22,11 @@ public class CoverActivity extends AppCompatActivity {
                 }catch (Exception e){
 
                 }
-                goLoginActivity();
+                ActivityUtils.goToActivity(CoverActivity.this,LoginActivity.class);
+                finish();
             }
         }).start();
+
     }
 
-    private void goLoginActivity(){
-        Intent intent = new Intent();
-        intent.setClass(CoverActivity.this,LoginActivity.class);
-        this.startActivity(intent);
-    }
 }

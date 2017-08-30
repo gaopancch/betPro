@@ -1,28 +1,49 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     tools:context="com.bet.gaopan.betpro.activity.CoverActivity">
 
     <TextView
         android:id="@+id/user_name_text"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="lobby"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.06" />
+        android:gravity="center"
+        android:paddingTop="20dp"
+        android:paddingBottom="20dp"/>
 
     <Button
-        android:id="@+id/go_room_button"
-        android:layout_width="wrap_content"
+        android:id="@+id/create_room_button"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="goRoom"
-        tools:layout_editor_absoluteX="148dp"
-        tools:layout_editor_absoluteY="248dp" />
+        android:text="开房间"
+        android:paddingTop="20dp"
+        android:paddingBottom="20dp" />
+    <View
+        android:layout_height="5dp"
+        android:layout_width="match_parent"/>
 
-</android.support.constraint.ConstraintLayout>
+    <Button
+        android:id="@+id/join_room_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="加入已有房间"
+        android:paddingTop="20dp"
+        android:paddingBottom="20dp" />
+    <View
+        android:layout_height="1dp"
+        android:layout_width="match_parent"/>
+
+    <TextView
+        android:id="@+id/last_room"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text=""
+        android:gravity="center"
+        android:paddingTop="20dp"
+        android:paddingBottom="20dp"/>
+</LinearLayout>

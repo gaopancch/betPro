@@ -8,4 +8,6 @@ import android.text.Editable;
 
 public class ConstantUtils {
     public static String userName="未知用户";
+    public static String lastRoomId="";
+    public static String LAST_ROOM_ID="lastRoomId";
 }

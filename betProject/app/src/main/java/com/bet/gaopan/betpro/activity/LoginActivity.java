@@ -32,6 +32,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bet.gaopan.betpro.R;
+import com.bet.gaopan.betpro.utils.ActivityUtils;
 import com.bet.gaopan.betpro.utils.ConstantUtils;
 
 import java.util.ArrayList;
@@ -71,21 +72,22 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+        mayRequestContacts();
         // Set up the login form.
         mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
         populateAutoComplete();
 
-        mPasswordView = (EditText) findViewById(R.id.password);
-        mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-            @Override
-            public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
-                if (id == R.id.login || id == EditorInfo.IME_NULL) {
-                    attemptLogin();
-                    return true;
-                }
-                return false;
-            }
-        });
+//        mPasswordView = (EditText) findViewById(R.id.password);
+//        mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+//            @Override
+//            public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
+//                if (id == R.id.login || id == EditorInfo.IME_NULL) {
+//                    attemptLogin();
+//                    return true;
+//                }
+//                return false;
+//            }
+//        });
 
         Button mEmailSignInButton = (Button) findViewById(R.id.email_sign_in_button);
         mEmailSignInButton.setOnClickListener(new OnClickListener() {
@@ -106,9 +108,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             return;
         }
        ConstantUtils.userName= userNameText;
-        Intent intent = new Intent();
-        intent.setClass(LoginActivity.this,LobbyActivity.class);
-        this.startActivity(intent);
+        ActivityUtils.goToActivity(LoginActivity.this,LobbyActivity.class);
+        finish();
     }
 
     private void populateAutoComplete() {
