@@ -9,12 +9,12 @@ import java.util.List;
 public class ParaCardJson {
 
     /**
-     * result : 0
+     * result : 500
      * data : [{"name":"gaopan","cards":[{"value":"A","hsdc":"spade"},{"value":"3","hsdc":"diamond"},{"value":"5","hsdc":"club"}]},{"name":"gaopan","cards":[{"value":"A","hsdc":"spade"},{"value":"3","hsdc":"diamond"},{"value":"5","hsdc":"club"}]}]
      */
 
     private String result;
-    private List<DataBean> data;
+    private List<playerBean> data;
 
     public String getResult() {
         return result;
@@ -24,15 +24,15 @@ public class ParaCardJson {
         this.result = result;
     }
 
-    public List<DataBean> getData() {
+    public List<playerBean> getData() {
         return data;
     }
 
-    public void setData(List<DataBean> data) {
+    public void setData(List<playerBean> data) {
         this.data = data;
     }
 
-    public static class DataBean {
+    public static class playerBean {
         /**
          * name : gaopan
          * cards : [{"value":"A","hsdc":"spade"},{"value":"3","hsdc":"diamond"},{"value":"5","hsdc":"club"}]
@@ -82,5 +82,15 @@ public class ParaCardJson {
                 this.hsdc = hsdc;
             }
         }
+
+//        public String toString(){
+//            //{"result":"500","data":[{"name":"gaopan","cards":[{"value":"A","hsdc":"spade"},{"value":"3","hsdc":"diamond"},{"value":"5","hsdc":"club"}]},{"name":"gaopan","cards":[{"value":"A","hsdc":"spade"},{"value":"3","hsdc":"diamond"},{"value":"5","hsdc":"club"}]}]}
+//            String temStr="{}";
+//
+//
+//
+//
+//            return  temStr;
+//        }
     }
 }

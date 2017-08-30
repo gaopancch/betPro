@@ -35,9 +35,17 @@ public class Player extends LinearLayout {
 
     }
 
+    public String getName(){
+        return  name;
+    }
+
+    public ArrayList<Card> getCards(){
+        return  cards;
+    }
+
     public void addCard(Card card){
 //        cards.add(card);
-        subLayout.addView(card,new LinearLayout.LayoutParams(300,400));
+        subLayout.addView(card,new LinearLayout.LayoutParams(200,300));
         cards.add(card);
     }
 

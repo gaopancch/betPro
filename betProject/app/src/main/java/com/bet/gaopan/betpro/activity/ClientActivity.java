@@ -93,6 +93,8 @@ public class ClientActivity extends Activity {
             public void onClick(View v) {
 //                result.append("client:" + "get_cards!" + "\n");
                 playerList.clear();
+                currentPlayer.clearCards();
+                parentLinearLayout.removeView(currentPlayer);
                 new MyThread("get_cards"+ ConstantUtils.userName,30001).start();
             }
         });
@@ -196,6 +198,7 @@ class MyThread extends Thread {
                 Gson mgson = new Gson();
                 ParaCardJson paraCardJson = mgson.fromJson(
                         strContent, ParaCardJson.class);
+
                 if(paraCardJson.getResult().equals("0")){//离开房间
                     ;
                 }else if(paraCardJson.getResult().equals("1")){//加入房间
@@ -203,7 +206,7 @@ class MyThread extends Thread {
                 }else if(paraCardJson.getResult().equals("500")){//获取牌型成功
 //                    getCardsFromServer.setText(strContent);
 
-                    ParaCardJson.DataBean playerBean;
+                    ParaCardJson.playerBean playerBean;
                     for (int i=0;i<paraCardJson.getData().size();i++) {
                         playerBean= paraCardJson.getData().get(i);//返回的第i个玩家 数据（名字，牌型）
                         String name=playerBean.getName();
@@ -212,7 +215,7 @@ class MyThread extends Thread {
                             result.setVisibility(View.GONE);
                             parentLinearLayout.removeView(currentPlayer);
                             parentLinearLayout.addView(currentPlayer);//把玩家加入界面
-                            ParaCardJson.DataBean.CardsBean cardsBean;
+                            ParaCardJson.playerBean.CardsBean cardsBean;
                             for (int j=0;j<playerBean.getCards().size();j++) {
                                 cardsBean = playerBean.getCards().get(j);//一根牌
                                 cardsBean.getHsdc();

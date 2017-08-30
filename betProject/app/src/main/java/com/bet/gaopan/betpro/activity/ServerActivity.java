@@ -7,16 +7,20 @@ import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Message;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.bet.gaopan.betpro.R;
+import com.bet.gaopan.betpro.json.ParaCardJson;
 import com.bet.gaopan.betpro.utils.ConstantUtils;
 import com.bet.gaopan.betpro.utils.ToastUtils;
+import com.bet.gaopan.betpro.views.Card;
+import com.bet.gaopan.betpro.views.CardBox;
+import com.bet.gaopan.betpro.views.Player;
+import com.google.gson.Gson;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -39,39 +43,36 @@ public class ServerActivity extends Activity {
      * {"result":"1","data":[{"name":"","cards":[{"value":"","hsdc":""}]}]}   收到加入房间请求后返回给客户端数据
      * {"result":"0","data":[{"name":"","cards":[{"value":"","hsdc":""}]}]}   收到离开房间请求后返回给客户端数据
      * */
-    private static TextView client_content;
-    private TextView ip;
-    private String serverIp = "";
-    private static ArrayList<String> currentPlayerList=new ArrayList<>();
-    private Thread joinThread,leaveThread,getCardThread;
+    private static TextView playerListTextView;//庄家 显示玩家列表
+    private TextView ipTextView;//显示房间号（ip地址）
+    private static ArrayList<String> currentPlayerList=new ArrayList<>();//当前玩家列表
+    private Thread joinThread,leaveThread,getCardThread;//服务器端的三个线程
     private boolean joinThreadKeep=true,leaveThreadKeep=true,getCardsThreadKeep=true;
-    private Button sendCards;
+    private Button sendCards;//发牌按钮
     private String joinRoomResponse="{\"result\":\"1\",\"data\":[{\"name\":\"\",\"cards\":[{\"value\":\"\",\"hsdc\":\"\"}]}]}";
     private String leaveRoomResponse="{\"result\":\"0\",\"data\":[{\"name\":\"\",\"cards\":[{\"value\":\"\",\"hsdc\":\"\"}]}]}";
-    private String cardsContent="{\"result\":\"500\",\"data\":[" +
-            "{\"name\":\"gaopan\",\"cards\":[" +
-            "{\"value\":\"A\",\"hsdc\":\"spade\"}," +
-            "{\"value\":\"3\",\"hsdc\":\"diamond\"}," +
-            "{\"value\":\"5\",\"hsdc\":\"club\"}]}," +
-
-            "{\"name\":\"gaopan1\",\"cards\":[" +
-            "{\"value\":\"A\",\"hsdc\":\"heart\"}," +
-            "{\"value\":\"6\",\"hsdc\":\"diamond\"}," +
-            "{\"value\":\"8\",\"hsdc\":\"club\"}]}]}";
-
+    private String cardsContent;//每次庄家发牌后更新该字符串
     private String nullCardsContent="{\"result\":\"499\",\"data\":[{\"name\":\"\",\"cards\":[{\"value\":\"\",\"hsdc\":\"\"}]}]}";
 
     private boolean hasSendCards=false;
+
+    private CardBox cardBox;
+    private ArrayList<Player> players=new ArrayList<Player>();
+    private LinearLayout parentLinearLayout;
+    private Player currentPlayer;
+    private Context context;
 
 
     public static Handler mHandler = new Handler() {
         @Override
         public void handleMessage(android.os.Message msg) {
             if (msg.what == 1) {
-                client_content.setText("");
+                playerListTextView.setText("");
+                playerListTextView.append("玩家:");
                 for (int i=0;i<currentPlayerList.size();i++){
-                    client_content.append("玩家:" + currentPlayerList.get(i)+ "  已加入\n");
+                    playerListTextView.append("  " + currentPlayerList.get(i));
                 }
+                playerListTextView.append(" 已加入游戏");
             }
         }
     };
@@ -79,26 +80,95 @@ public class ServerActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_server);
-        client_content = (TextView) findViewById(R.id.client_content);
-        ip = (TextView) findViewById(R.id.ip);
-        sendCards=(Button)findViewById(R.id.send_cards);
-        serverIp = getlocalip();
-        ip.setText("用户："+ConstantUtils.userName+"\n房间号:" + serverIp+"  \n请其他玩家输入房间号，加入该房间");
-        currentPlayerList.clear();
-        currentPlayerList.add(ConstantUtils.userName);
-        newJoinThread();
-        newGetCardsThread();
-        leaveRoomThread();
+        initViews();
+        initFormationBeforePlay();
         sendCards.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                hasSendCards=!hasSendCards;
+                if(hasSendCards){
+                    sendCards.setText("发牌");
+                    currentPlayer.clearCards();
+                    parentLinearLayout.removeView(currentPlayer);
+                }else {
+                    actionWhileSendCards();
+                }
+                hasSendCards = !hasSendCards;
             }
         });
+
     }
 
+    private  Gson gson=new Gson();
+    private void actionWhileSendCards(){
+        sendCards.setText("洗牌");
+        //洗牌
+        cardBox.clearCardBox();
+        //清除上次玩家
+        players.clear();
+        //把当前玩家全部加入
+        for(int i=0;i<currentPlayerList.size();i++){
+            Player player=new Player(context,currentPlayerList.get(i));
+            players.add(player);
+        }
+        //发牌
+        for(int i=0;i<players.size();i++){
+            players.get(i).clearCards();
+            players.get(i).addCard(cardBox.sendCard());
+            players.get(i).addCard(cardBox.sendCard());
+            players.get(i).addCard(cardBox.sendCard());
+        }
+        showCurrentPlayerCards();
+    }
 
+    private void showCurrentPlayerCards(){
+        ParaCardJson paraCardJson=playersToParaCardJson();
+        cardsContent=gson.toJson(paraCardJson);
+        ParaCardJson.playerBean playerBean;
+        for (int i=0;i<paraCardJson.getData().size();i++) {
+            playerBean= paraCardJson.getData().get(i);//返回的第i个玩家 数据（名字，牌型）
+            String name=playerBean.getName();
+
+            if(name.equals(ConstantUtils.userName)){//如果是自己的牌就获取，如果是其他玩家的忽略
+                parentLinearLayout.removeView(currentPlayer);
+                parentLinearLayout.addView(currentPlayer);//把玩家加入界面
+                ParaCardJson.playerBean.CardsBean cardsBean;
+                for (int j=0;j<playerBean.getCards().size();j++) {
+                    cardsBean = playerBean.getCards().get(j);//一根牌
+                    cardsBean.getHsdc();
+                    cardsBean.getValue();
+                    Card card=new Card(context);
+                    card.setValue(cardsBean.getValue());
+                    card.setType(cardsBean.getHsdc());
+                    currentPlayer.addCard(card);
+                }
+            }
+            currentPlayer.showCards();
+        }
+    }
+
+    private ParaCardJson playersToParaCardJson() {
+        ParaCardJson paraCardJson = new ParaCardJson();
+        paraCardJson.setResult("500");
+        ArrayList<ParaCardJson.playerBean> data = new ArrayList<>();
+        ParaCardJson.playerBean playerBean;
+        ArrayList<ParaCardJson.playerBean.CardsBean> cards;
+        for (int i = 0; i < players.size(); i++) {
+            playerBean = new ParaCardJson.playerBean();
+            playerBean.setName(players.get(i).getName());
+            cards = new ArrayList<>();
+            ParaCardJson.playerBean.CardsBean cardsBean;
+            for (int j = 0; j < players.get(i).getCards().size(); j++) {
+                cardsBean = new ParaCardJson.playerBean.CardsBean();
+                cardsBean.setValue(players.get(i).getCards().get(j).getValue());
+                cardsBean.setHsdc(players.get(i).getCards().get(j).getType());
+                cards.add(cardsBean);
+            }
+            playerBean.setCards(cards);
+            data.add(playerBean);
+        }
+        paraCardJson.setData(data);
+        return paraCardJson;
+    }
     private void newGetCardsThread(){
         getCardThread=new GetCardsThread();
         getCardThread.start();
@@ -278,6 +348,27 @@ public class ServerActivity extends Activity {
         } else {
             finish();
         }
+    }
+
+    private void initViews(){
+        context=this;
+        setContentView(R.layout.activity_server);
+        parentLinearLayout=(LinearLayout)findViewById(R.id.server_linearlayout);
+        playerListTextView = (TextView) findViewById(R.id.client_content);
+        ipTextView = (TextView) findViewById(R.id.ip);
+        sendCards=(Button)findViewById(R.id.send_cards);
+        ipTextView.setText("用户："+ConstantUtils.userName+"\n房间号:" + getlocalip()+"  \n请其他玩家输入房间号，加入该房间");
+    }
+
+    private void initFormationBeforePlay(){
+        //找一副牌（不含大小王）
+        cardBox=new CardBox(this);
+        currentPlayerList.clear();
+        currentPlayerList.add(ConstantUtils.userName);
+        newJoinThread();
+        newGetCardsThread();
+        leaveRoomThread();
+        currentPlayer=new Player(this,ConstantUtils.userName);//初始化庄家
     }
 
     @Override

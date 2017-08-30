@@ -60,6 +60,10 @@ public class Card extends LinearLayout {
         number=value;
     }
 
+    public String getValue(){
+        return  number;
+    }
+
     public void setType(HSDC_type type){
         this.type=type;
     }
@@ -76,9 +80,28 @@ public class Card extends LinearLayout {
         }
     }
 
+    public String getType(){
+        String typeStr="";
+        switch (type){
+            case heart:
+                typeStr="heart";
+                break;
+            case spade:
+                typeStr="spade";
+                break;
+            case diamond:
+                typeStr="diamond";
+                break;
+            case club:
+                typeStr="club";
+                break;
+        }
+        return  typeStr;
+    }
+
     private void initNumberText(Context context){
         numberText=new TextView(context);
-        numberText.setTextSize(50);
+        numberText.setTextSize(20);
         numberText.setTextColor(Color.WHITE);
         setOrientation(LinearLayout.VERTICAL);
         addView(numberText);

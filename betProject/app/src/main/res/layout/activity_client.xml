@@ -11,26 +11,23 @@
     <EditText
         android:id="@+id/input"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
+        android:layout_height="50dp"
         android:hint="输入房间号" />
 
     <Button
         android:id="@+id/send"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
+        android:layout_height="50dp"
         android:text="加入房间" />
     <View
-        android:layout_height="10dp"
+        android:layout_height="5dp"
         android:layout_width="match_parent"/>
 
 
     <Button
         android:id="@+id/get_cards_from_server"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
+        android:layout_height="50dp"
         android:text="拿牌" />
 
 
@@ -38,6 +35,5 @@
         android:id="@+id/result"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="5"
         android:text="result" />
 </LinearLayout>
