@@ -1,39 +1,100 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:background="@drawable/background_m"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="match_parent">
+<ScrollView
     android:orientation="vertical"
-    android:id="@+id/parent_linearlayout_client"
-    tools:context="com.bet.gaopan.betpro.activity.ClientActivity">
-
-    <EditText
-        android:id="@+id/input"
-        android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:hint="输入房间号" />
-
-    <Button
-        android:id="@+id/send"
-        android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:text="加入房间" />
-    <View
-        android:layout_height="5dp"
-        android:layout_width="match_parent"/>
-
-
-    <Button
-        android:id="@+id/get_cards_from_server"
-        android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:text="拿牌" />
-
-
-    <TextView
-        android:id="@+id/result"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="result" />
-</LinearLayout>
+        android:orientation="vertical"
+        tools:context="com.bet.gaopan.betpro.activity.ClientActivity">
+
+        <EditText
+            android:paddingLeft="10dp"
+            android:id="@+id/input"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:hint="输入房间号" />
+
+        <Button
+            android:id="@+id/send"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:paddingLeft="30dp"
+            android:paddingRight="40dp"
+            android:layout_marginLeft="50dp"
+            android:layout_marginRight="50dp"
+            android:textSize="16sp"
+            android:textColor="#d84042"
+            android:background="@drawable/roundbutton"
+            android:textAllCaps="false"
+            android:text="加入房间" />
+        <View
+            android:layout_height="5dp"
+            android:layout_width="match_parent"/>
+        <TextView
+            android:id="@+id/client_content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/simplekuang"
+            android:gravity="center"
+            android:paddingLeft="12dp"
+            android:paddingRight="12dp"
+            android:layout_marginBottom="10dp"
+            android:visibility="gone"/>
+        <!--<LinearLayout-->
+            <!--android:layout_weight="2"-->
+            <!--android:orientation="horizontal"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:background="@color/colorPrimary"-->
+            <!--android:layout_height="50dp">-->
+            <Button
+                android:id="@+id/get_cards_from_server"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_marginLeft="50dp"
+                android:layout_marginRight="50dp"
+                android:textSize="16sp"
+                android:textColor="#d84042"
+                android:background="@drawable/roundbutton"
+                android:text="拿牌" />
+        <View
+            android:layout_height="5dp"
+            android:layout_width="match_parent"/>
+            <Button
+                android:id="@+id/show_cards_client"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_marginLeft="50dp"
+                android:layout_marginRight="50dp"
+                android:textSize="16sp"
+                android:textColor="#d84042"
+                android:background="@drawable/roundbutton"
+                android:text="看牌" />
+        <!--</LinearLayout>-->
+
+        <LinearLayout
+            android:paddingLeft="10dp"
+            android:orientation="vertical"
+            android:id="@+id/parent_scroll_client"
+            android:textSize="16sp"
+            android:textColor="#d84042"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>
+    <ProgressBar
+        android:id="@+id/progress_bar_clien"
+        android:indeterminateDrawable="@drawable/progressbar"
+        android:layout_centerInParent="true"
+        android:visibility="gone"
+        android:layout_width="80dp"
+        android:layout_height="80dp" />
+</RelativeLayout>

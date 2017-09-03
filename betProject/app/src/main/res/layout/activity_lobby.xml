@@ -5,45 +5,90 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:background="@drawable/background_m"
     tools:context="com.bet.gaopan.betpro.activity.CoverActivity">
+
+    <LinearLayout
+        android:background="#ffffff"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <ImageButton
+            android:id="@+id/back_button"
+            android:layout_marginTop="10dp"
+            android:layout_marginLeft="10dp"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
+            android:scaleType="fitXY"
+            android:background="@drawable/back"
+            app:srcCompat="@mipmap/ic_launcher_round" />
+
+        <TextView
+            android:id="@+id/bar_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dp"
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="8dp"
+            android:layout_gravity="center"
+            android:text="返回登录界面"
+            android:textSize="12sp"
+            android:gravity="center"/>
+    </LinearLayout>
 
     <TextView
         android:id="@+id/user_name_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="lobby"
+        android:textSize="16sp"
+        android:textColor="#fd9a76"
         android:gravity="center"
-        android:paddingTop="20dp"
-        android:paddingBottom="20dp"/>
-
-    <Button
-        android:id="@+id/create_room_button"
+        android:paddingBottom="20dp"
+        android:paddingTop="20dp"/>
+    <LinearLayout
+        android:id="@+id/three_button_linear"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="开房间"
-        android:paddingTop="20dp"
-        android:paddingBottom="20dp" />
-    <View
-        android:layout_height="5dp"
-        android:layout_width="match_parent"/>
+        android:orientation="vertical">
+        <Button
+            android:id="@+id/create_room_button"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_marginLeft="50dp"
+            android:layout_marginRight="50dp"
+            android:textSize="16sp"
+            android:textColor="#d84042"
+            android:text="开房间"
+            android:background="@drawable/roundbutton" />
+        <View
+            android:layout_height="5dp"
+            android:layout_width="match_parent"/>
 
-    <Button
-        android:id="@+id/join_room_button"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="加入已有房间"
-        android:paddingTop="20dp"
-        android:paddingBottom="20dp" />
-    <View
-        android:layout_height="1dp"
-        android:layout_width="match_parent"/>
+        <Button
+            android:id="@+id/join_room_button"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_marginLeft="50dp"
+            android:layout_marginRight="50dp"
+            android:textSize="16sp"
+            android:textColor="#d84042"
+            android:background="@drawable/roundbutton"
+            android:text="加入其他房间" />
+        <View
+            android:layout_height="5dp"
+            android:layout_width="match_parent"/>
 
-    <TextView
-        android:id="@+id/last_room"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text=""
-        android:gravity="center"
-        android:paddingTop="20dp"
-        android:paddingBottom="20dp"/>
+        <Button
+            android:id="@+id/last_room"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_marginLeft="50dp"
+            android:layout_marginRight="50dp"
+            android:textSize="16sp"
+            android:textColor="#d84042"
+            android:background="@drawable/roundbutton"
+            android:text=""
+            android:gravity="center" />
+    </LinearLayout>
 </LinearLayout>

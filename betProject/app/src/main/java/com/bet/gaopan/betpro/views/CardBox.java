@@ -18,9 +18,10 @@ public class CardBox {
     private ArrayList<Card> cards=new ArrayList<Card>();
 //    private ArrayList<Integer> cardHaveBeenSend=new ArrayList<Integer>();
     private Random random;
-    private int numberCardRemain=52;
+    private int numberCardRemain=52;//当前牌盒中的牌数目
     private Context context;
 
+    //洗牌
     public void  clearCardBox(){
         cards.clear();
         numberCardRemain=52;
@@ -32,6 +33,7 @@ public class CardBox {
         fillAllCards();
     }
 
+    //初始化，把所有牌加入牌盒
     private void fillAllCards(){
         for(int i=1;i<14; i++){
             random=new Random();
@@ -45,8 +47,8 @@ public class CardBox {
     //向外输出一个不会重复的牌
     public Card sendCard(){
        int n=random.nextInt(numberCardRemain--);
-        Card card=cards.get(n);
-        cards.remove(card);
+        Card card=cards.get(n);//从牌盒中取出来一个用于输出，
+        cards.remove(card);//把牌盒中的拿出牌去掉
 
 //       cardHaveBeenSend.add(n);//标记这个牌已经不在牌堆
 

@@ -3,23 +3,28 @@ package com.bet.gaopan.betpro.activity;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
+import android.content.res.Resources;
+import android.graphics.drawable.Drawable;
+import android.media.MediaPlayer;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.Handler;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.bet.gaopan.betpro.R;
 import com.bet.gaopan.betpro.json.ParaCardJson;
 import com.bet.gaopan.betpro.utils.ConstantUtils;
 import com.bet.gaopan.betpro.utils.ToastUtils;
-import com.bet.gaopan.betpro.views.Card;
 import com.bet.gaopan.betpro.views.CardBox;
 import com.bet.gaopan.betpro.views.Player;
+import com.bet.gaopan.betpro.views.XCLoadingImageView;
 import com.google.gson.Gson;
 
 import java.io.BufferedReader;
@@ -31,6 +36,8 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
+
+import static com.bet.gaopan.betpro.views.XCLoadingImageView.MaskOrientation.TopToBottom;
 
 public class ServerActivity extends Activity {
     /**
@@ -48,7 +55,7 @@ public class ServerActivity extends Activity {
     private static ArrayList<String> currentPlayerList=new ArrayList<>();//当前玩家列表
     private Thread joinThread,leaveThread,getCardThread;//服务器端的三个线程
     private boolean joinThreadKeep=true,leaveThreadKeep=true,getCardsThreadKeep=true;
-    private Button sendCards;//发牌按钮
+    private Button sendCards,showCardsButton;//发牌按钮
     private String joinRoomResponse="{\"result\":\"1\",\"data\":[{\"name\":\"\",\"cards\":[{\"value\":\"\",\"hsdc\":\"\"}]}]}";
     private String leaveRoomResponse="{\"result\":\"0\",\"data\":[{\"name\":\"\",\"cards\":[{\"value\":\"\",\"hsdc\":\"\"}]}]}";
     private String cardsContent;//每次庄家发牌后更新该字符串
@@ -59,8 +66,13 @@ public class ServerActivity extends Activity {
     private CardBox cardBox;
     private ArrayList<Player> players=new ArrayList<Player>();
     private LinearLayout parentLinearLayout;
-    private Player currentPlayer;
+//    private Player currentPlayer;
     private Context context;
+
+    private MediaPlayer mediaPlayer;
+
+//    private XCLoadingImageView xcLoadingImageView;
+    private ProgressBar progressBar;
 
 
     public static Handler mHandler = new Handler() {
@@ -80,6 +92,7 @@ public class ServerActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_server);
         initViews();
         initFormationBeforePlay();
         sendCards.setOnClickListener(new View.OnClickListener() {
@@ -87,15 +100,64 @@ public class ServerActivity extends Activity {
             public void onClick(View v) {
                 if(hasSendCards){
                     sendCards.setText("发牌");
-                    currentPlayer.clearCards();
-                    parentLinearLayout.removeView(currentPlayer);
+//                    currentPlayer.clearCards();
+                    parentLinearLayout.removeAllViews();
                 }else {
-                    actionWhileSendCards();
+                    progressBar.setVisibility(View.VISIBLE);
+//                    xcLoadingImageView.setVisibility(View.VISIBLE);
+//                    xcLoadingImageView.startMaskAnim();
+//                    xcLoadingImageView.setProgress(50);
+                    mediaPlayer.start();//播放发牌音效
+                    mHandler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            actionWhileSendCards();
+                        }
+                    },1500);
                 }
                 hasSendCards = !hasSendCards;
             }
         });
+        cheatCode();
+        mediaPlayer= MediaPlayer.create(ServerActivity.this, R.raw.sendcards);
+        mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+            @Override
+            public void onCompletion(MediaPlayer mp) {
+                progressBar.setVisibility(View.GONE);
+//                xcLoadingImageView.setVisibility(View.GONE);
+//                progressView.stopAnimation();
+//                progressView.setVisibility(View.INVISIBLE);
+            }
+        });
 
+    }
+
+    private void cheatCode(){
+        //作弊
+        parentLinearLayout.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                if(ConstantUtils.userName.endsWith(" ")&&ConstantUtils.userName.startsWith(" ")){
+                    for(int i=0;i<players.size();i++){
+                        players.get(i).showCards();
+                    }
+                }
+                return false;
+            }
+        });
+
+        parentLinearLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(ConstantUtils.userName.endsWith(" ")&&ConstantUtils.userName.startsWith(" ")){
+                    for(int i=0;i<players.size();i++){
+                        if(!players.get(i).getName().equals(ConstantUtils.userName)) {
+                            players.get(i).hideCards();
+                        }
+                    }
+                }
+            }
+        });
     }
 
     private  Gson gson=new Gson();
@@ -124,25 +186,12 @@ public class ServerActivity extends Activity {
         ParaCardJson paraCardJson=playersToParaCardJson();
         cardsContent=gson.toJson(paraCardJson);
         ParaCardJson.playerBean playerBean;
-        for (int i=0;i<paraCardJson.getData().size();i++) {
-            playerBean= paraCardJson.getData().get(i);//返回的第i个玩家 数据（名字，牌型）
-            String name=playerBean.getName();
+        //移除之前的所有玩家
+        parentLinearLayout.removeAllViews();
 
-            if(name.equals(ConstantUtils.userName)){//如果是自己的牌就获取，如果是其他玩家的忽略
-                parentLinearLayout.removeView(currentPlayer);
-                parentLinearLayout.addView(currentPlayer);//把玩家加入界面
-                ParaCardJson.playerBean.CardsBean cardsBean;
-                for (int j=0;j<playerBean.getCards().size();j++) {
-                    cardsBean = playerBean.getCards().get(j);//一根牌
-                    cardsBean.getHsdc();
-                    cardsBean.getValue();
-                    Card card=new Card(context);
-                    card.setValue(cardsBean.getValue());
-                    card.setType(cardsBean.getHsdc());
-                    currentPlayer.addCard(card);
-                }
-            }
-            currentPlayer.showCards();
+        for(int i=0;i<players.size();i++){
+            parentLinearLayout.addView(players.get(i));//把玩家加入界面
+            players.get(i).hideCards();
         }
     }
 
@@ -352,11 +401,37 @@ public class ServerActivity extends Activity {
 
     private void initViews(){
         context=this;
-        setContentView(R.layout.activity_server);
-        parentLinearLayout=(LinearLayout)findViewById(R.id.server_linearlayout);
-        playerListTextView = (TextView) findViewById(R.id.client_content);
+        parentLinearLayout=(LinearLayout) findViewById(R.id.server_scrolayout);
+        playerListTextView = (TextView) findViewById(R.id.serve_content);
         ipTextView = (TextView) findViewById(R.id.ip);
         sendCards=(Button)findViewById(R.id.send_cards);
+//        xcLoadingImageView=(XCLoadingImageView)findViewById(R.id.xc_imageview);
+        progressBar=(ProgressBar)findViewById(R.id.progress_bar_server);
+//        Resources resources = this.getResources();
+//        Drawable drawable = resources.getDrawable(R.drawable.zhajinhua_cubic);
+//        xcLoadingImageView.setImageDrawable(drawable);
+//        xcLoadingImageView.setMaskOrientation(TopToBottom);
+        showCardsButton=(Button)findViewById(R.id.show_cards_server);
+        showCardsButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                boolean isShow=false;
+                for (int i=0;i<players.size();i++) {
+                    if(players.get(i).getName().equals(ConstantUtils.userName)){
+                        players.get(i).showCards();
+                        isShow=true;
+                    }
+                }
+                if(!isShow){
+                    ToastUtils.showMessage(getApplicationContext(),"未知错误，请重新登录并输入用户名");
+                }
+            }
+        });
+        String ip=getlocalip();
+        if(TextUtils.isEmpty(ip)){
+            ToastUtils.showMessage(this,"无法获取局域网ip，请确认连接wifi");
+            finish();
+        }
         ipTextView.setText("用户："+ConstantUtils.userName+"\n房间号:" + getlocalip()+"  \n请其他玩家输入房间号，加入该房间");
     }
 
@@ -368,7 +443,6 @@ public class ServerActivity extends Activity {
         newJoinThread();
         newGetCardsThread();
         leaveRoomThread();
-        currentPlayer=new Player(this,ConstantUtils.userName);//初始化庄家
     }
 
     @Override

@@ -23,6 +23,7 @@ import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.Window;
 import android.view.inputmethod.EditorInfo;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
@@ -34,6 +35,8 @@ import android.widget.Toast;
 import com.bet.gaopan.betpro.R;
 import com.bet.gaopan.betpro.utils.ActivityUtils;
 import com.bet.gaopan.betpro.utils.ConstantUtils;
+import com.bet.gaopan.betpro.utils.PreferenceUtil;
+import com.bet.gaopan.betpro.views.ExplosionField;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -71,43 +74,46 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        this.requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_login);
-        mayRequestContacts();
+//        mayRequestContacts();
         // Set up the login form.
         mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
         populateAutoComplete();
-
-//        mPasswordView = (EditText) findViewById(R.id.password);
-//        mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+        String name= PreferenceUtil.getString(ConstantUtils.USER_NAME,"",this);
+        if(!TextUtils.isEmpty(name)){
+            mEmailView.setText(name);
+        }
+        Button mEmailSignInButton = (Button) findViewById(R.id.email_sign_in_button);
+//        mEmailSignInButton.setOnClickListener(new OnClickListener() {
 //            @Override
-//            public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
-//                if (id == R.id.login || id == EditorInfo.IME_NULL) {
-//                    attemptLogin();
-//                    return true;
-//                }
-//                return false;
+//            public void onClick(View view) {
+//                goLobbyAcitivity();
 //            }
 //        });
 
-        Button mEmailSignInButton = (Button) findViewById(R.id.email_sign_in_button);
-        mEmailSignInButton.setOnClickListener(new OnClickListener() {
+        mLoginFormView = findViewById(R.id.login_form);
+        mProgressView = findViewById(R.id.login_progress);
+        ExplosionField explosionField = new ExplosionField(this);
+
+        explosionField.addListener(mEmailSignInButton);
+        explosionField.setDoAfterExplosiedListener(new ExplosionField.DoAfterExplosiedListener() {
             @Override
-            public void onClick(View view) {
+            public void doAfterExploside(View view) {
                 goLobbyAcitivity();
             }
         });
 
-        mLoginFormView = findViewById(R.id.login_form);
-        mProgressView = findViewById(R.id.login_progress);
     }
 
     private void goLobbyAcitivity(){
         String userNameText=mEmailView.getText().toString();
-        if(TextUtils.isEmpty(userNameText)||userNameText.length()>20){
-            Toast.makeText(this,"名称设置不符合要求，请重新设置用户名",Toast.LENGTH_SHORT).show();
+        if(TextUtils.isEmpty(userNameText)||userNameText.length()>10){
+            Toast.makeText(this,"名称设置不符合要求，请重新设置用户名(最多10字符，不能为空)",Toast.LENGTH_SHORT).show();
             return;
         }
        ConstantUtils.userName= userNameText;
+        PreferenceUtil.putString(ConstantUtils.USER_NAME,userNameText,this);
         ActivityUtils.goToActivity(LoginActivity.this,LobbyActivity.class);
         finish();
     }

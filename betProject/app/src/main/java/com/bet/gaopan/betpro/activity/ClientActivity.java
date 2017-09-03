@@ -8,9 +8,12 @@ import android.os.Message;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -36,24 +39,29 @@ import java.util.TimerTask;
 
 public class ClientActivity extends Activity {
 
-    private TextView result;
     private Button joinRoomButton;
-    private Button getCardsFromServer;
+    private Button getCardsFromServer,showCardButton;
     private EditText inputIP;//输入的ip地址（房间号）
     private ClientState state=ClientState.idle;
-    private ArrayList<String> playerList=new ArrayList<>();
+    private ArrayList<Player> playerList=new ArrayList<>();
     private Player currentPlayer;
-    private LinearLayout parentLinearLayout;
+    private LinearLayout parentScrollLayout;
     private Context context;
-//    private Card card;
+    private InputMethodManager imm;
+    private TextView clientTextView;
+    private ProgressBar progressBar;
 
     public Handler myHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
+            progressBar.setVisibility(View.GONE);
             if (msg.what == 1) {
-                result.append("server:" + msg.obj + "\n");
                 String serverResponse=(String)msg.obj;
                 parseUserData(serverResponse);
+            }else if(msg.what == 303){
+                Toast.makeText(getApplicationContext(),"服务器连接失败！请检查网络是否打开并确认房间号是否正确！",Toast.LENGTH_SHORT).show();
+            }else if(msg.what == 304){
+                Toast.makeText(getApplicationContext(),"连接失败！请确认房间号是否输入正确！",Toast.LENGTH_SHORT).show();
             }
         }
 
@@ -69,22 +77,45 @@ public class ClientActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_client);
-        parentLinearLayout=(LinearLayout)findViewById(R.id.parent_linearlayout_client) ;
-        result = (TextView) findViewById(R.id.result);
+        parentScrollLayout =(LinearLayout) findViewById(R.id.parent_scroll_client) ;
+//        result = (TextView) findViewById(R.id.result);
         joinRoomButton = (Button) findViewById(R.id.send);
         getCardsFromServer=(Button)findViewById(R.id.get_cards_from_server);
+        showCardButton=(Button)findViewById(R.id.show_cards_client);
         inputIP = (EditText) findViewById(R.id.input);
+        clientTextView=(TextView)findViewById(R.id.client_content);
+        progressBar=(ProgressBar)findViewById(R.id.progress_bar_clien);
         context=this;
         currentPlayer=new Player(this,ConstantUtils.userName);
-//        card=new Card(this);
 
+        imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        showCardButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                boolean isShow=false;
+                for (int i=0;i<playerList.size();i++) {
+                    if(playerList.get(i).getName().equals(ConstantUtils.userName)){
+                        playerList.get(i).showCards();
+                        isShow=true;
+                    }
+                }
+                if(!isShow){
+                    ToastUtils.showMessage(getApplicationContext(),"未知错误，请重新登录并输入用户名");
+                }
+            }
+        });
 
         joinRoomButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 //                result.append("client:" + "join room!" + "\n");
                 //启动线程 向服务器发送和接收信息
-                new MyThread("join_room"+ ConstantUtils.userName,30000).start();
+                if(!TextUtils.isEmpty(inputIP.getText().toString())){
+                    progressBar.setVisibility(View.VISIBLE);
+                    new MyThread("join_room"+ ConstantUtils.userName,30000).start();
+                }else{
+                    ToastUtils.showMessage(getApplicationContext(),"请输入正确的房间号");
+                }
             }
         });
 
@@ -92,9 +123,10 @@ public class ClientActivity extends Activity {
             @Override
             public void onClick(View v) {
 //                result.append("client:" + "get_cards!" + "\n");
+                progressBar.setVisibility(View.VISIBLE);
                 playerList.clear();
                 currentPlayer.clearCards();
-                parentLinearLayout.removeView(currentPlayer);
+                parentScrollLayout.removeView(currentPlayer);
                 new MyThread("get_cards"+ ConstantUtils.userName,30001).start();
             }
         });
@@ -102,8 +134,9 @@ public class ClientActivity extends Activity {
         if(!TextUtils.isEmpty(ConstantUtils.lastRoomId)){
             inputIP.setText(ConstantUtils.lastRoomId);
         }
-
+        cheatCode();
     }
+
 
 class MyThread extends Thread {
 
@@ -151,12 +184,11 @@ class MyThread extends Thread {
             socket.close();
         } catch (SocketTimeoutException aa) {
             //连接超时 在UI界面显示消息
-            Log.i("gaopan123","请检查网络是否打开");
-            Toast.makeText(getApplicationContext(),"服务器连接失败！请检查网络是否打开",Toast.LENGTH_SHORT).show();
+            myHandler.sendEmptyMessage(303);
+            Log.i("gaopan123","连接超时");
         } catch (IOException e) {
+            myHandler.sendEmptyMessage(304);
             Log.i("gaopan123","未知错误");
-            e.printStackTrace();
-            Toast.makeText(getApplicationContext(),"服务器连接失败！未知错误",Toast.LENGTH_SHORT).show();
         }
     }
 }
@@ -202,54 +234,68 @@ class MyThread extends Thread {
                 if(paraCardJson.getResult().equals("0")){//离开房间
                     ;
                 }else if(paraCardJson.getResult().equals("1")){//加入房间
+                    myHandler.sendEmptyMessageDelayed(305,500);
                     hasJoinRoom();
                 }else if(paraCardJson.getResult().equals("500")){//获取牌型成功
 //                    getCardsFromServer.setText(strContent);
-
+                    parentScrollLayout.removeAllViews();
                     ParaCardJson.playerBean playerBean;
                     for (int i=0;i<paraCardJson.getData().size();i++) {
                         playerBean= paraCardJson.getData().get(i);//返回的第i个玩家 数据（名字，牌型）
                         String name=playerBean.getName();
-                        playerList.add(name);
-                        if(name.equals(ConstantUtils.userName)){//如果是自己的牌就获取，如果是其他玩家的忽略
-                            result.setVisibility(View.GONE);
-                            parentLinearLayout.removeView(currentPlayer);
-                            parentLinearLayout.addView(currentPlayer);//把玩家加入界面
-                            ParaCardJson.playerBean.CardsBean cardsBean;
-                            for (int j=0;j<playerBean.getCards().size();j++) {
-                                cardsBean = playerBean.getCards().get(j);//一根牌
-                                cardsBean.getHsdc();
-                                cardsBean.getValue();
-                                Card card=new Card(context);
-                                card.setValue(cardsBean.getValue());
-                                card.setType(cardsBean.getHsdc());
-                                currentPlayer.addCard(card);
-                            }
-                        }
-                        currentPlayer.showCards();
-                    }
+                        Player player=new Player(context,name);
+                        playerList.add(player);
+                        parentScrollLayout.addView(player);//把玩家加入界面
 
+                        ParaCardJson.playerBean.CardsBean cardsBean;
+                        for (int j=0;j<playerBean.getCards().size();j++) {
+                            cardsBean = playerBean.getCards().get(j);//一根牌
+                            cardsBean.getHsdc();
+                            cardsBean.getValue();
+                            Card card=new Card(context);
+                            card.setValue(cardsBean.getValue());
+                            card.setType(cardsBean.getHsdc());
+                            player.addCard(card);
+                        }
+                        player.hideCards();
+                    }
+                    showCPlayerList();
+                    myHandler.sendEmptyMessageDelayed(305,500);
                 }else if(paraCardJson.getResult().equals("499")){ //还没有发牌
+//                    parentScrollLayout.removeView(currentPlayer);
                     Toast.makeText(getApplicationContext(),"庄家尚未发牌，请等待",Toast.LENGTH_SHORT).show();
                 }
-
+                myHandler.sendEmptyMessageDelayed(305,500);
                 return PARASE_RESULT_OK;
             } catch (Exception e) {
                 e.printStackTrace();
+                myHandler.sendEmptyMessageDelayed(305,500);
                 Toast.makeText(getApplicationContext(),"PARASE_RESULT_EXCEPTION",Toast.LENGTH_SHORT).show();
                 return PARASE_RESULT_EXCEPTION;
             }
         }
+        myHandler.sendEmptyMessageDelayed(305,500);
         Toast.makeText(getApplicationContext(),"PARASE_RESULT_NULL",Toast.LENGTH_SHORT).show();
         return PARASE_RESULT_NULL;
     }
 
+    private void showCPlayerList(){
+        StringBuffer playerListStr=new StringBuffer();
+        playerListStr.append("当前玩家：");
+        for(int i=0;i<playerList.size();i++){
+            playerListStr.append(" "+playerList.get(i).getName());
+        }
+        clientTextView.setVisibility(View.VISIBLE);
+        clientTextView.setText(playerListStr);
+    }
+
     private void hasJoinRoom(){
         joinRoomButton.setClickable(false);
-        joinRoomButton.setText(ConstantUtils.userName+":已经加入房间，等待庄家发牌");
+        joinRoomButton.setText(ConstantUtils.userName+":已经加入房间");
         PreferenceUtil.putString(ConstantUtils.LAST_ROOM_ID,inputIP.getText().toString(),getApplicationContext());
         inputIP.setVisibility(View.GONE);
         state=ClientState.inRoom;
+        imm.hideSoftInputFromWindow(inputIP.getWindowToken(), 0);
     }
 
     /**未做客户端所存在的状态*/
@@ -257,5 +303,33 @@ class MyThread extends Thread {
         idle,
         inRoom,
         outRoom
+    }
+
+    private void cheatCode(){
+        //作弊
+        parentScrollLayout.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                if(ConstantUtils.userName.endsWith(" ")&&ConstantUtils.userName.startsWith(" ")){
+                    for(int i=0;i<playerList.size();i++){
+                        playerList.get(i).showCards();
+                    }
+                }
+                return false;
+            }
+        });
+
+        parentScrollLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(ConstantUtils.userName.endsWith(" ")&&ConstantUtils.userName.startsWith(" ")){
+                    for(int i=0;i<playerList.size();i++){
+                        if(!playerList.get(i).getName().equals(ConstantUtils.userName)) {
+                            playerList.get(i).hideCards();
+                        }
+                    }
+                }
+            }
+        });
     }
 }

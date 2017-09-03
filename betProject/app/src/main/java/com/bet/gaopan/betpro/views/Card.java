@@ -2,6 +2,7 @@ package com.bet.gaopan.betpro.views;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.os.Handler;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -9,6 +10,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.bet.gaopan.betpro.R;
+import com.bet.gaopan.betpro.activity.ServerActivity;
 
 import static com.bet.gaopan.betpro.views.Card.HSDC_type.club;
 import static com.bet.gaopan.betpro.views.Card.HSDC_type.diamond;
@@ -44,7 +46,7 @@ public class Card extends LinearLayout {
         }
         number=numbers[value];
         this.type=type;
-        showCard();
+//        showCard();
     }
 
     public Card(Context context){
@@ -128,12 +130,13 @@ public class Card extends LinearLayout {
 
     public void hideCard(){
         numberText.setText("");
-        setBackgroundResource(R.drawable.bet);
+        setBackgroundResource(R.drawable.zhajinhua_cubic);
     }
 
     public void showCard(){
         numberText.setText(number);
         setBackgroundWithType();
+
     }
 
 }
