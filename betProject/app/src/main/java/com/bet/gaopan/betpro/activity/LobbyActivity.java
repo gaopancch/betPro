@@ -17,6 +17,7 @@ import com.bet.gaopan.betpro.utils.ConstantUtils;
 import com.bet.gaopan.betpro.utils.PreferenceUtil;
 import com.bet.gaopan.betpro.utils.ToastUtils;
 import com.bet.gaopan.betpro.views.ExplosionField;
+import com.pgyersdk.update.PgyUpdateManager;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -86,6 +87,9 @@ public class LobbyActivity extends Activity {
                 }
             }
         });
+
+        PgyUpdateManager.setIsForced(true); //设置是否强制更新。true为强制更新；false为不强制更新（默认值）。
+        PgyUpdateManager.register(this, "com.bet.gaopan.betpro.fileprovider");
     }
 
     @Override
